@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="TC3PingEsp" Id="{21f75327-2077-4795-9f74-24d00712d9ed}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM TC3PingEsp
+VAR CONSTANT
+//ip:	ARRAY[0..2]  OF STRING :=	['172.16.6.6','172.16.6.5','172.16.5.4'];	// is the addresses which will be pinged.	
+quantityOfIps :SINT := 3 ; 
+waitResult :TIME := T#15S;	
+timeBetweenPingcycles: TIME := T#15S;
+END_VAR
+
+VAR
+ip:	ARRAY[0..2]  OF STRING :=	['172.16.6.6','172.16.6.5','172.16.5.4'];	// is the addresses which will be pinged.	
+outsidelight : BOOL := FALSE ;		
+Maingate : BOOL := FALSE ; 	
+Server : BOOL := FALSE ; 			
+	result : ARRAY[0..2] OF BOOL := [3(FALSE)];	
+	iState : INT :=0;								// statemaskin				
+	waitingForResults : TON :=  (PT:= waitResult);	// timer att vänta mellan att ip-listan körs igenom
+	pingcycles: TON;	
+	pIndex : INT := 0;							// index till ipp och result	
+	pingReply 	:INT := -1;					// -1 for pending, 0 for ping failed, 1 ping succeeded											
+	comndLine	:STRING(139);
+	ping 		:NT_StartProcess; 	
+	start 		:BOOL;	
+
+	Message: STRING(255);
+	Errors: SINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[waitingforResults();
+actPing();
+pingcycles(IN:= , PT:=timeBetweenPingcycles , Q=> , ET=> );		
+CASE iState OF
+	0:			pIndex := 0;				// index till adresser att pinga och till resultat	
+iState := 10;
+	10:	start := TRUE;								// här startar vi ett ping		
+		IF pingReply = -1 AND ping.Busy THEN
+iState := 20;				// ping har anropats, gå vidare
+		END_IF;		
+	20: IF NOT ping.Busy THEN
+			waitingforResults.IN := TRUE; // Start timer "waitingforResults" i.e. pingreply  = 1 OR 0 not -1 
+			iState := 30;				// anrop klart, vänta på svar i 30
+		END_IF
+	30:IF pingReply = 0 THEN
+			result[pIndex] := FALSE;	// result was ok e.g ping was NOT -1
+			iState := 40;
+		ELSIF pingReply = 1 THEN		
+			result[pIndex] := TRUE;		// result was ok e.g ping was NOT -1
+			iState := 40;
+		END_IF
+		IF waitingForResults.ET = T#10S THEN //Debug 
+			result[pIndex] :=FALSE;
+			Message := ip[pIndex];
+			Errors := Errors + 1;
+			istate := 40;
+		//	waitingForResults.IN := FALSE;
+		END_IF
+	40:	waitingforResults.IN := FALSE; 	//pinging complete stop waitingforResults
+		pIndex := pIndex + 1;			// ta nästa IP att pinga
+		IF pIndex > quantityOfIps - 1 THEN  // -1 as index starts 0
+			pIndex := 0;				// det var den sista, börja om från början			
+			iState := 50;
+		ELSE
+			iState := 10;				// pinga nästa i arrayen
+		END_IF
+	50: outsidelight := result[0];
+		Maingate:= result[1] ;
+		Server:= result[2] ;
+		pingcycles.IN := TRUE;	
+		IF pingcycles.Q THEN
+			result[0] := result[1] :=result[2] := FALSE ; //Debug just to see result change better
+			pingcycles.IN := FALSE;
+			iState := 0;
+		END_IF;	
+END_CASE]]></ST>
+    </Implementation>
+    <Action Name="actPing" Id="{1274eab1-d4b5-4fa8-908c-d9bcfd2277bd}">
+      <Implementation>
+        <ST><![CDATA[comndLine:=CONCAT(STR1:='""""TC3PingEsp.pingReply"""" -value (Test-Connection -ComputerName ',STR2:=TC3PingEsp.ip[pIndex]);
+comndLine:=CONCAT(STR1:=comndLine, STR2:=' -Quiet) -Force;Close-TcSession -InputObject $$s;""');
+ping(
+	NetId := '',
+	PathStr := 'powershellw -WindowStyle hidden -c $$r=get-adsroute -local;$$s=New-TcSession -Route $$r -Port 851;Write-TcValue -Session $$s -Path ',	
+	DirName := 'C:\Windows\System32',
+	ComndLine := comndLine,
+	Start := start,
+	TmOut := DEFAULT_ADS_TIMEOUT
+);
+
+IF start THEN
+	pingReply := -1;
+	start := FALSE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>
