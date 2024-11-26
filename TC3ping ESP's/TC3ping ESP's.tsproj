@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.59">
 	<Project ProjectGUID="{C90C952A-BC61-4E06-AAFB-C30C874028AD}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
+			<Settings MaxCpus="8" NonWinCpus="1">
+				<Cpu CpuId="7"/>
+			</Settings>
 			<Tasks>
 				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
 					<Name>PlcTask</Name>
@@ -10,7 +13,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{7E705969-8364-4A40-8597-E79565E199FD}" Name="NewTC3ping" PrjFilePath="NewTC3ping\NewTC3ping.plcproj" TmcFilePath="NewTC3ping\NewTC3ping.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="NewTC3ping\NewTC3ping.tmc" TmcHash="{BFF43BBB-1410-5BF1-A147-C713C77BBCC7}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="NewTC3ping\NewTC3ping.tmc" TmcHash="{766FB374-E054-1FE7-A71D-193E035B7EFC}">
 					<Name>NewTC3ping Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

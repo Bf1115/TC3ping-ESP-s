@@ -1,0 +1,3 @@
+powershellw.exe is a version of powershell that not opens the shell.
+It just executes the command.
+Place it in C:\Windows\System32\WindowsPowerShell\v1.0

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
   <POU Name="TC3PingEsp" Id="{21f75327-2077-4795-9f74-24d00712d9ed}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM TC3PingEsp
 VAR CONSTANT
@@ -10,7 +10,7 @@ timeBetweenPingcycles: TIME := T#15S;
 END_VAR
 
 VAR
-ip:	ARRAY[0..2]  OF STRING :=	['172.16.6.6','172.16.6.5','172.16.5.4'];	// is the addresses which will be pinged.	
+ip:	ARRAY[0..2]  OF STRING :=	['172.16.5.4','172.16.5.4','172.16.5.4'];	// is the addresses which will be pinged.	
 outsidelight : BOOL := FALSE ;		
 Maingate : BOOL := FALSE ; 	
 Server : BOOL := FALSE ; 			
